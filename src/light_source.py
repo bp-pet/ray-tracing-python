@@ -1,6 +1,6 @@
-from src.vector import Vector
+import numpy as np
+
 
 class LightSource:
-
-    def __init__(self, position: Vector):
+    def __init__(self, position: np.array):  # 3
         self.position = position

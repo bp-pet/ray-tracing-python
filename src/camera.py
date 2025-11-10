@@ -1,4 +1,7 @@
-from src.vector import Vector, dot, cross
+import numpy as np
+
+from src.constants import TOLERANCE
+from src.utils import unit
 
 
 class Camera:
@@ -19,11 +22,11 @@ class Camera:
 
     def __init__(
         self,
-        eye_position: Vector,
+        eye_position: np.ndarray,
         window_size_x: float,
         window_size_y: float,
-        viewing_direction: Vector,
-        orientation_vector: Vector,
+        viewing_direction: np.ndarray,
+        orientation_vector: np.ndarray,
         window_distance: float,
     ):
         self.eye_position = eye_position
@@ -34,19 +37,19 @@ class Camera:
         # TODO implement default orientation (just vertical)
         self.window_distance = window_distance
 
-        assert dot(self.viewing_direction, self.orientation_vector) == 0, (
-            "Orientation be orthogonal to the viewing direction"
-        )
+        assert (
+            np.abs(np.dot(self.viewing_direction, self.orientation_vector)) < TOLERANCE
+        ), "Orientation be orthogonal to the viewing direction"
 
         self.window_center = self.eye_position + (
-            self.viewing_direction.unit() * self.window_distance
+            unit(self.viewing_direction) * self.window_distance
         )
 
         # it's not really unit but the one from the center to the top/right border
         # maybe should be renamed
-        self.up_unit = self.orientation_vector.unit() * self.window_size_x
+        self.up_unit = unit(self.orientation_vector) * self.window_size_x
         self.right_unit = (
-            -cross(self.orientation_vector, self.viewing_direction).unit()
+            -unit(np.cross(self.orientation_vector, self.viewing_direction))
             * self.window_size_y
         )
 
@@ -75,11 +78,11 @@ class Camera:
 if __name__ == "__main__":
     """Testing basic properties."""
     camera = Camera(
-        eye_position=Vector(5, 0, 0),
+        eye_position=np.array((5, 0, 0)),
         window_size_x=1,
         window_size_y=1,
-        viewing_direction=Vector(-1, 0, 0),
-        orientation_vector=Vector(0, 0, 1),
+        viewing_direction=np.array((-1, 0, 0)),
+        orientation_vector=np.array((0, 0, 1)),
         window_distance=1,
     )
 

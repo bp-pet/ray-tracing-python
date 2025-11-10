@@ -5,7 +5,6 @@ from src.constants import background_color
 from src.scene_objects import SceneObject
 from src.light_source import LightSource
 from src.simple_image import SimpleImage
-from src.vector import Vector, dot
 
 
 class Scene:
@@ -40,17 +39,13 @@ class Scene:
         pixel_size_y = self.camera.window_size_y / resolution_y
 
         pixel_centers = np.zeros(3, pixel_size_x, pixel_size_y)  # 3 by x by y
-        top_left = np.array(self.camera.top_left.get_tuple())  # 3
-        up_unit = np.array(self.camera.up_unit.get_tuple())  # 3
-        right_unit = np.array(self.camera.right_unit.get_tuple())  # 3
         # TODO write without loops
         for i in range(resolution_x):
-            row = []
             for j in range(resolution_y):
                 pixel_centers[:, i, j] = (
-                    top_left
-                    - ((i + 0.5) * 2 * pixel_size_x * up_unit)
-                    + ((j + 0.5) * 2 * pixel_size_y * right_unit)
+                    self.camera.top_left
+                    - ((i + 0.5) * 2 * pixel_size_x * self.camera.up_unit)
+                    + ((j + 0.5) * 2 * pixel_size_y * self.camera.right_unit)
                 )
 
         P = pixel_centers.reshape(3, -1)  # 3 by x*y

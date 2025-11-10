@@ -1,23 +1,21 @@
 import numpy as np
 
-from src.vector import Vector
-
 
 class SceneObject:
-    def __init__(self, color=Vector):
+    def __init__(self, color=np.array):  # 3
         self.color = color
 
     def intersect_rays(
-        self, P: np.ndarray, V: np.ndarray, t_min: float, t_max: float
-    ) -> np.ndarray:
+        self, P: np.array, V: np.array, t_min: float, t_max: float
+    ) -> np.array:
         return np.array(None)
 
-    def get_unit_normal_at_point(self, p: Vector) -> Vector:
-        return Vector(0, 0, 0)
+    def get_unit_normal_at_point(self, p: np.array) -> np.array:  # 3; 3
+        return np.array((0, 0, 0))
 
 
 class Sphere(SceneObject):
-    def __init__(self, center: Vector, radius: float, color=Vector):
+    def __init__(self, center: np.array, radius: float, color=np.array):  # 3; 3
         self.center = center
         self.radius = radius
         self.color = color
@@ -26,8 +24,8 @@ class Sphere(SceneObject):
         return f"Sphere with center {self.center}, radius {self.radius}, color {self.color}"
 
     def intersect_rays(
-        self, P: np.ndarray, V: np.ndarray, t_min: float, t_max: float
-    ) -> np.ndarray:
+        self, P: np.array, V: np.array, t_min: float, t_max: float
+    ) -> np.array:
         """Given rays with origins P (3-by-n) and direction v (3-by-n), find the
         distance to the intersection, or return None if there isn't one.
 
@@ -80,7 +78,7 @@ class Sphere(SceneObject):
         # result has a t-value or nan
         return result
 
-    def get_unit_normal_at_point(self, p: Vector) -> Vector:
+    def get_unit_normal_at_point(self, p: np.array) -> np.array:  # 3; 3
         """
         Calculate the normal at a point. If the point is not on
         the sphere, it will be projected on it.
