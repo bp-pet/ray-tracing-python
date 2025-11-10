@@ -1,5 +1,6 @@
 from src.vector import Vector, dot, cross
 
+
 class Camera:
     """
     Characterized by an 'eye' and a 'window', where the eye 'views' a scene
@@ -44,7 +45,10 @@ class Camera:
         # it's not really unit but the one from the center to the top/right border
         # maybe should be renamed
         self.up_unit = self.orientation_vector.unit() * self.window_size_x
-        self.right_unit = -cross(self.orientation_vector, self.viewing_direction).unit() * self.window_size_y
+        self.right_unit = (
+            -cross(self.orientation_vector, self.viewing_direction).unit()
+            * self.window_size_y
+        )
 
         self.top_right = (
             self.window_center
@@ -67,6 +71,7 @@ class Camera:
             - (self.right_unit * self.window_size_y)
         )
 
+
 if __name__ == "__main__":
     """Testing basic properties."""
     camera = Camera(
@@ -77,7 +82,7 @@ if __name__ == "__main__":
         orientation_vector=Vector(0, 0, 1),
         window_distance=1,
     )
-    
+
     print(camera.window_center)
     print(camera.up_unit)
     print(camera.right_unit)

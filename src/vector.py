@@ -38,6 +38,9 @@ class Vector:
     def __str__(self):
         return f"{self.x}, {self.y}, {self.z}"
 
+    def get_tuple(self):
+        return (self.x, self.y, self.z)
+
 
 def dot(v1: Vector, v2: Vector) -> float:
     return (v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z)

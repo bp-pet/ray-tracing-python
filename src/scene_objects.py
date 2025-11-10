@@ -7,10 +7,10 @@ class SceneObject:
     def __init__(self, color=Vector):
         self.color = color
 
-    def intersect_ray(
-        self, p: Vector, v: Vector, t_min: float, t_max: float
-    ) -> float | None:
-        pass
+    def intersect_rays(
+        self, P: np.ndarray, V: np.ndarray, t_min: float, t_max: float
+    ) -> np.ndarray:
+        return np.array(None)
 
     def get_unit_normal_at_point(self, p: Vector) -> Vector:
         return Vector(0, 0, 0)
@@ -34,7 +34,6 @@ class Sphere(SceneObject):
         Returns the smaller t value that is in the given interval.
 
         Derivation for a single ray:
-
         Let (x0, y0, z0) be the center of the sphere and r the radius.
 
         (p.x + t * v.x - x0) ** 2
@@ -50,31 +49,33 @@ class Sphere(SceneObject):
         """
 
         # create arrays for sphere parameters
-        S = np.array([self.center.x, self.center.y, self.center.z])[:, np.newaxis]
-        R = np.array([self.radius])[:, np.newaxis]
+        S = np.array([self.center.x, self.center.y, self.center.z])[
+            :, np.newaxis
+        ]  # 3 by 1
+        R = np.array([self.radius])[:, np.newaxis]  # 1 by 1
 
-        A = (V**2).sum(axis=0)
-        B = ((P - S) * V).sum(axis=0)
-        C = (P - S) ** 2 - R**2
+        A = (V**2).sum(axis=0)  # 1 by n
+        B = ((P - S) * V).sum(axis=0)  # 1 by n
+        C = (P - S) ** 2 - R**2  # 1 by n
 
-        Dbig = B**2 - 4 * A * C
+        Dbig = B**2 - 4 * A * C  # 1 by n
 
-        sqrtDbig = np.sqrt(Dbig)
+        sqrtDbig = np.sqrt(Dbig)  # 1 by n
 
-        T1 = (-B + sqrtDbig) / (2 * A)
-        T2 = (-B - sqrtDbig) / (2 * A)
-        T = np.stack([T1, T2], axis=0)
-        T_processed = np.where(np.abs(T) > 1e10, np.inf, T)
+        T1 = (-B + sqrtDbig) / (2 * A)  # 1 by n
+        T2 = (-B - sqrtDbig) / (2 * A)  # 1 by n
+        T = np.stack([T1, T2], axis=0)  # 2 by n
+        T_processed = np.where(np.abs(T) > 1e10, np.inf, T)  # 2 by n
         # entries will be nan if D < 0 and inf/really large if A = 0
 
         # checks for each entry
-        valid_mask = ~(np.isnan(T_processed) | np.isinf(T_processed))
-        valid_mask &= (T_processed >= t_min) & (T_processed <= t_max)
-        T_masked = np.where(valid_mask, T_processed, np.inf)
+        valid_mask = ~(np.isnan(T_processed) | np.isinf(T_processed))  # 2 by n
+        valid_mask &= (T_processed >= t_min) & (T_processed <= t_max)  # 2 by n
+        T_masked = np.where(valid_mask, T_processed, np.inf)  # 2 by n
 
         # get smallest nad drop it if it is inf
-        result = np.min(T_masked, axis=1)
-        result = np.where(np.isinf(result), np.nan, result)
+        result = np.min(T_masked, axis=1)  # n
+        result = np.where(np.isinf(result), np.nan, result)  # n
 
         # result has a t-value or nan
         return result
