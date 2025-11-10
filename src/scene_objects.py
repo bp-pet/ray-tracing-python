@@ -1,13 +1,18 @@
 import math
 
 from src.vector import Vector
-from src.light_source import LightSource
+
 
 class SceneObject:
-    def intersect_ray(self, p: Vector, v: Vector) -> float | None:
+    def intersect_ray(
+        self, p: Vector, v: Vector, t_min: float, t_max: float
+    ) -> float | None:
         pass
 
     def get_normal_at_point(self, p: Vector) -> float:
+        pass
+
+    def get_unit_normal_at_point(self, p: Vector) -> float:
         pass
 
 
@@ -19,20 +24,22 @@ class Sphere(SceneObject):
 
     def __str__(self):
         return f"Sphere with center {self.center}, radius {self.radius}, color {self.color}"
-    
-    def intersect_ray(self, p: Vector, v: Vector) -> float | None:
+
+    def intersect_ray(
+        self, p: Vector, v: Vector, t_min: float, t_max: float
+    ) -> float | None:
         """Given a ray with origin p and direction v, find the
         distance to the intersection, or return None if there isn't one.
 
-        Returns the t value if t > 1, where the ray is defined by p + t * v.
+        Returns the smaller t value that is in the given interval.
 
         Derivation:
-        
+
         (p.x + t * v.x - x0) ** 2
         + (p.y + t * v.y - y0) ** 2
         + (p.z + t * v.z - z0) ** 2
         = r ** 2
-        
+
         (vx ** 2 + vy ** 2 + vz ** 2) * t ** 2
         + 2 * ((px - x0) * vx + (py - y0) * vy + (pz - z0) * vz) * t
         + (px - x0) ** 2  + (py - y0) ** 2 + (pz - z0) ** 2 - r ** 2
@@ -44,26 +51,33 @@ class Sphere(SceneObject):
         z0 = self.center.z
         r = self.radius
 
-        a = (v.x ** 2 + v.y ** 2 + v.z ** 2)
+        a = v.x**2 + v.y**2 + v.z**2
         b = 2 * ((p.x - x0) * v.x + (p.y - y0) * v.y + (p.z - z0) * v.z)
-        c = (p.x - x0) ** 2  + (p.y - y0) ** 2 + (p.z - z0) ** 2 - r ** 2
+        c = (p.x - x0) ** 2 + (p.y - y0) ** 2 + (p.z - z0) ** 2 - r**2
 
         if a == 0:
             return -c / b
-        
-        D = b ** 2 - 4 * a * c
+
+        D = b**2 - 4 * a * c
 
         if D < 0:
             return None
-        
+
         sqrtD = math.sqrt(D)
-        
+
         t1 = (-b + sqrtD) / (2 * a)
         t2 = (-b - sqrtD) / (2 * a)
 
-        t =  min(max(t1, 1), max(t2, 1))
+        t1 = t1 if t_min <= t1 <= t_max else None
+        t2 = t2 if t_min <= t2 <= t_max else None
 
-        return t if t > 1 else None
+        if t1 is None and t2 is None:
+            return None
+        if t1 is None:
+            return t2
+        if t2 is None:
+            return t1
+        return min(t1, t2)
 
     def get_unit_normal_at_point(self, p: Vector) -> float:
         """

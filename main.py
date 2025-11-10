@@ -18,12 +18,13 @@ if __name__ == "__main__":
         window_distance=1,
     )
 
-
     scene_objects = [
-        Sphere(center=Vector(0, 0, 0), radius=1, color=Vector(255, 0, 0)),
+        Sphere(center=Vector(0.9, -1.6, 1.9), radius=0.3, color=Vector(255, 0, 0)),
         Sphere(center=Vector(-2, 0, 0.5), radius=3, color=Vector(0, 255, 0)),
-        Sphere(center=Vector(0, 0, 0), radius=0.5, color=Vector(0, 255, 100)), # inside red ball
-        Sphere(center=Vector(0, 0, -1000), radius=990, color=Vector(0, 0, 255))
+        Sphere(
+            center=Vector(0, 0, 0), radius=0.5, color=Vector(0, 255, 100)
+        ),  # inside red ball
+        Sphere(center=Vector(0, 0, -1000), radius=990, color=Vector(0, 0, 255)),
     ]
 
     light_sources = [
@@ -31,9 +32,11 @@ if __name__ == "__main__":
         # LightSource(position=Vector(2, 0, 0))
     ]
 
-    scene = Scene(camera=camera, scene_objects=scene_objects, light_sources=light_sources)
+    scene = Scene(
+        camera=camera, scene_objects=scene_objects, light_sources=light_sources
+    )
 
-    pmm = scene.capture(1000, 1000).get_pmm()
+    pmm = scene.capture(1000, 1000, verbose=True).get_pmm()
 
     with open("output/output.pmm", "w") as f:
         f.write(pmm)
