@@ -1,4 +1,5 @@
 from src.camera import Camera
+from src.light_source import LightSource
 from src.scene import Scene
 from src.scene_objects import Sphere
 from src.vector import Vector
@@ -17,12 +18,20 @@ if __name__ == "__main__":
         window_distance=1,
     )
 
-    # red ball of radius 1 at origin
-    sphere1 = Sphere(center=Vector(0, 0, 0), radius=1, color=(255, 0, 0))
-    sphere2 = Sphere(center=Vector(-2, 0, 0.5), radius=3, color=(0, 0, 255))
-    sphere3 = Sphere(center=Vector(0, 0, 0), radius=0.5, color=(0, 255, 0)) # inside red ball
 
-    scene = Scene(camera=camera, scene_objects=[sphere1, sphere2, sphere3])
+    scene_objects = [
+        Sphere(center=Vector(0, 0, 0), radius=1, color=Vector(255, 0, 0)),
+        Sphere(center=Vector(-2, 0, 0.5), radius=3, color=Vector(0, 255, 0)),
+        Sphere(center=Vector(0, 0, 0), radius=0.5, color=Vector(0, 255, 100)), # inside red ball
+        Sphere(center=Vector(0, 0, -1000), radius=990, color=Vector(0, 0, 255))
+    ]
+
+    light_sources = [
+        LightSource(position=Vector(5, -2, 4))
+        # LightSource(position=Vector(2, 0, 0))
+    ]
+
+    scene = Scene(camera=camera, scene_objects=scene_objects, light_sources=light_sources)
 
     pmm = scene.capture(1000, 1000).get_pmm()
 

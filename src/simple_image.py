@@ -1,6 +1,8 @@
+from src.vector import Vector
+
 class SimpleImage:
 
-    def __init__(self, pixels = list[list[tuple[int]]]):
+    def __init__(self, pixels = list[list[Vector]]):
         """
         Create an image. Given data must be list of rows (lists), where each
         row is a list of pixels (tuples). Each pixel has 3 color values (RGB).
@@ -21,14 +23,12 @@ class SimpleImage:
         assert num_cols > 0
         for row in self.pixels:
             assert len(row) == num_cols
-            for pixel in row:
-                assert len(pixel) == 3
 
     def get_pmm(self) -> str:
         result = f"P3\n{self.num_rows} {self.num_cols}\n255\n"
         for row in self.pixels:
             for pixel in row:
-                result += f"{pixel[0]} {pixel[1]} {pixel[2]}\n"
+                result += f"{int(pixel.x)} {int(pixel.y)} {int(pixel.z)}\n"
         return result
 
 

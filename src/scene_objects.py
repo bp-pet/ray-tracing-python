@@ -1,14 +1,18 @@
 import math
 
 from src.vector import Vector
+from src.light_source import LightSource
 
 class SceneObject:
     def intersect_ray(self, p: Vector, v: Vector) -> float | None:
         pass
 
+    def get_normal_at_point(self, p: Vector) -> float:
+        pass
+
 
 class Sphere(SceneObject):
-    def __init__(self, center: Vector, radius: float, color=tuple[float]):
+    def __init__(self, center: Vector, radius: float, color=Vector):
         self.center = center
         self.radius = radius
         self.color = color
@@ -60,3 +64,10 @@ class Sphere(SceneObject):
         t =  min(max(t1, 1), max(t2, 1))
 
         return t if t > 1 else None
+
+    def get_unit_normal_at_point(self, p: Vector) -> float:
+        """
+        Calculate the normal at a point. If the point is not on
+        the sphere, it will be projected on it.
+        """
+        return (p - self.center).unit()

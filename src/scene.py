@@ -1,21 +1,32 @@
 import math
 
 from src.camera import Camera
+from src.constants import background_color
 from src.scene_objects import SceneObject
+from src.light_source import LightSource
 from src.simple_image import SimpleImage
+from src.vector import Vector, dot
 
 class Scene:
-    def __init__(self, camera: Camera, scene_objects: list[SceneObject]):
+    def __init__(self, camera: Camera, scene_objects: list[SceneObject], light_sources: list[LightSource]):
         self.camera = camera
         self.scene_objects = scene_objects
+        self.light_sources = light_sources
 
     def capture(self, resolution_x: int, resolution_y: int) -> SimpleImage:
+        """
+        Capture the scene with a given resolution.
+
+        x is top to bottom, y is left to right.
+        """
         assert resolution_x > 0
         assert resolution_y > 0
         pixels = []
         pixel_size_x = self.camera.window_size_x / resolution_x
         pixel_size_y = self.camera.window_size_y / resolution_y
         for i in range(resolution_x):
+            if (i + 1) % 10 == 0:
+                print(f"Rendering row {i + 1} of {resolution_x}")
             row = []
             for j in range(resolution_y):
                 pixel_center = (
@@ -26,26 +37,37 @@ class Scene:
                 ray_direction = pixel_center - self.camera.eye_position
 
                 if not self.scene_objects:
-                    row.append((0, 0, 0))
+                    row.append(Vector(*background_color))
                     continue
                 
                 distances = []
                 for scene_object in self.scene_objects:
                     distances.append(scene_object.intersect_ray(self.camera.eye_position, ray_direction))
 
-                min_val = math.inf
+                min_distance = math.inf
                 min_index = None
                 for ind, distance in enumerate(distances):
-                    if distance is not None and distance < min_val:
-                        min_val = distance
+                    if distance is not None and distance < min_distance:
+                        min_distance = distance
                         min_index = ind
                 
                 if min_index is None:
-                    row.append((0, 0, 0))
+                    row.append(Vector(*background_color))
                     continue
-                    
+
                 collided_object = self.scene_objects[min_index]
-                row.append(collided_object.color)
+                collision_point = self.camera.eye_position + min_distance * ray_direction
+                unit_normal = collided_object.get_unit_normal_at_point(collision_point)
+
+                total_illumination = 0
+                for light_source in self.light_sources:
+                    unit_ray_to_light_source = (light_source.position - collision_point).unit()
+                    # TODO check for collision
+                    total_illumination += max(0, dot(unit_normal, unit_ray_to_light_source))
+                illumination = total_illumination / len(self.light_sources)
+                # not sure this is a good way to do illumination but it doesn't matter for one source
+                
+                row.append(collided_object.color * illumination)
             pixels.append(row)
         return SimpleImage(pixels)
 
