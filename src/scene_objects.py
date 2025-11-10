@@ -6,16 +6,16 @@ class SceneObject:
         self.color = color
 
     def intersect_rays(
-        self, P: np.array, V: np.array, t_min: float, t_max: float
-    ) -> np.array:
+        self, P: np.ndarray, V: np.ndarray, t_min: float, t_max: float
+    ) -> np.ndarray:
         return np.array(None)
 
-    def get_unit_normal_at_point(self, p: np.array) -> np.array:  # 3; 3
+    def get_unit_normal_at_point(self, p: np.ndarray) -> np.ndarray:  # 3; 3
         return np.array((0, 0, 0))
 
 
 class Sphere(SceneObject):
-    def __init__(self, center: np.array, radius: float, color=np.array):  # 3; 3
+    def __init__(self, center: np.ndarray, radius: float, color=np.array):  # 3; 3
         self.center = center
         self.radius = radius
         self.color = color
@@ -24,8 +24,8 @@ class Sphere(SceneObject):
         return f"Sphere with center {self.center}, radius {self.radius}, color {self.color}"
 
     def intersect_rays(
-        self, P: np.array, V: np.array, t_min: float, t_max: float
-    ) -> np.array:
+        self, P: np.ndarray, V: np.ndarray, t_min: float, t_max: float
+    ) -> np.ndarray:
         """Given rays with origins P (3-by-n) and direction v (3-by-n), find the
         distance to the intersection, or return None if there isn't one.
 
@@ -47,9 +47,7 @@ class Sphere(SceneObject):
         """
 
         # create arrays for sphere parameters
-        S = np.array([self.center.x, self.center.y, self.center.z])[
-            :, np.newaxis
-        ]  # 3 by 1
+        S = self.center[:, np.newaxis]  # 3 by 1
         R = np.array([self.radius])[:, np.newaxis]  # 1 by 1
 
         A = (V**2).sum(axis=0)  # 1 by n
@@ -78,7 +76,7 @@ class Sphere(SceneObject):
         # result has a t-value or nan
         return result
 
-    def get_unit_normal_at_point(self, p: np.array) -> np.array:  # 3; 3
+    def get_unit_normal_at_point(self, p: np.ndarray) -> np.ndarray:  # 3; 3
         """
         Calculate the normal at a point. If the point is not on
         the sphere, it will be projected on it.

@@ -2,7 +2,7 @@ import numpy as np
 
 
 class SimpleImage:
-    def __init__(self, pixels: np.array):  # x by y by 3
+    def __init__(self, pixels: np.ndarray):  # x by y by 3
         """
         Create an image of an array of x (vertical) by y (horizontal)
         by 3 (rgb).

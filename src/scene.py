@@ -32,13 +32,14 @@ class Scene:
         assert resolution_y > 0
 
         if not self.scene_objects:
-            return np.tile(background_color, (1, resolution_x, resolution_y))
+            return SimpleImage(
+                np.tile(background_color, (1, resolution_x, resolution_y))
+            )
 
-        pixels = []
         pixel_size_x = self.camera.window_size_x / resolution_x
         pixel_size_y = self.camera.window_size_y / resolution_y
 
-        pixel_centers = np.zeros(3, pixel_size_x, pixel_size_y)  # 3 by x by y
+        pixel_centers = np.zeros((3, resolution_x, resolution_y))  # 3 by x by y
         # TODO write without loops
         for i in range(resolution_x):
             for j in range(resolution_y):
@@ -58,7 +59,9 @@ class Scene:
             temp = scene_object.intersect_rays(
                 self.camera.eye_position, V, 1, np.inf
             )  # n
-            distances[obj_index, :, :] = temp.reshape(resolution_x, resolution_y)
+            distances[obj_index, :, :] = np.array(temp).reshape(
+                resolution_x, resolution_y
+            )
 
         # UP TO HERE HAS BEEN REWRITTEN TO NUMPY
 
