@@ -73,30 +73,6 @@ class Scene:
                 )
                 unit_normal = collided_object.get_unit_normal_at_point(collision_point)
 
-                total_illumination = 0.0
-                for light_source in self.light_sources:
-                    ray_to_light_source = light_source.position - collision_point
-
-                    # check for shadow
-                    in_shadow = False
-                    for scene_object in self.scene_objects:
-                        if scene_object == collided_object:
-                            continue
-                        shadow_distance = scene_object.intersect_ray(
-                            collision_point, ray_to_light_source, 0, 1
-                        )
-                        if shadow_distance is not None:
-                            in_shadow = True
-                            break
-
-                    total_illumination += (
-                        max(0, dot(unit_normal, ray_to_light_source.unit()))
-                        if not in_shadow
-                        else 0
-                    )
-                illumination = total_illumination / len(self.light_sources)
-                # not sure this is a good way to do illumination but it doesn't matter for one source
-
-                row.append(collided_object.color * illumination)
+                row.append(collided_object.color)
             pixels.append(row)
         return SimpleImage(pixels)
