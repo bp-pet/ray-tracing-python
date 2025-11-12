@@ -32,6 +32,7 @@ class Scene:
         assert resolution_y > 0
 
         if not self.scene_objects:
+            # if no object just return empty background
             return SimpleImage(
                 np.tile(background_color, (1, resolution_x, resolution_y))
             )
@@ -39,8 +40,10 @@ class Scene:
         pixel_size_x = self.camera.window_size_x / resolution_x
         pixel_size_y = self.camera.window_size_y / resolution_y
 
-        down_units_range = (np.arange(resolution_x) + 0.5) * 2 * pixel_size_x
-        right_units_range = (np.arange(resolution_y) + 0.5) * 2 * pixel_size_y
+        # Get all pixel centers by starting from top left and applying offsets down and right:
+        down_units_range = (np.arange(resolution_x) + 0.5) * 2 * pixel_size_x  # x
+        right_units_range = (np.arange(resolution_y) + 0.5) * 2 * pixel_size_y  # y
+        # how many units to move in each direction for each pixel
         pixel_centers = (
             self.camera.top_left[:, np.newaxis, np.newaxis]
             - down_units_range[np.newaxis, :, np.newaxis]
@@ -49,50 +52,49 @@ class Scene:
             * self.camera.right_unit[:, np.newaxis, np.newaxis]
         )  # 3 by x by y
 
+        # Get input for intersection function:
         V = (
             pixel_centers.reshape(3, -1) - self.camera.eye_position[:, np.newaxis]
         )  # 3 by x*y
         assert V.shape == (3, resolution_x * resolution_y)
-
         P = np.tile(
             self.camera.eye_position[:, np.newaxis], (1, resolution_x * resolution_y)
         )  # 3 by x*y
-        # TODO probably it doesn't need to be tiled
         assert P.shape == (3, resolution_x * resolution_y)
+        # intersection function takes unfolded array of rays
 
+        # Calculate intersection with each object and save the colors in an array
         distances = np.zeros(
             shape=(len(self.scene_objects), resolution_x, resolution_y)
         )  # b by x by y
-
-        # Calculate intersection with each object
         object_colors = np.zeros((len(self.scene_objects) + 1, 3))  # b+1 by 3
         for obj_index, scene_object in enumerate(self.scene_objects):
             t_values_per_pixel_unfolded = scene_object.intersect_rays(
                 P, V, 1, np.inf
             )  # x * y
+            # results have to be folded into x by y again
             t_values_per_pixel = t_values_per_pixel_unfolded.reshape(
                 resolution_x, resolution_y
             )  # x by y
-            distances[obj_index, :, :] = t_values_per_pixel  # b by x by y
-
+            distances[obj_index, :, :] = t_values_per_pixel
             object_colors[obj_index, :] = scene_object.color
 
         object_colors[-1, :] = np.array(
             background_color
         )  # set the default as last element
 
-        # Get the closest object for each pixel
+        # Get the closest object (index) for each pixel
         collision_object_indices = np.argmin(distances, axis=0)  # x by y
-        mask = np.any(distances < np.inf, axis=0)
+        mask = np.any(distances < np.inf, axis=0)  # pixels that have a collision at all
         collision_object_indices = np.where(
             mask, collision_object_indices, -1
         )  # x by y
         # 2d array with elements corresponding to indices of objects
         assert collision_object_indices.shape == (resolution_x, resolution_y)
 
-        # TODO rewrite without loops
         pixels = object_colors[collision_object_indices, :]
 
+        # TODO this part has to be rewritten with numpy
         # total_illumination = 0.0
         # for light_source in self.light_sources:
         #     ray_to_light_source = light_source.position - collision_point
