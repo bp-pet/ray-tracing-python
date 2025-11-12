@@ -1,8 +1,9 @@
+import numpy as np
+
 from src.camera import Camera
 from src.light_source import LightSource
 from src.scene import Scene
-from src.scene_objects import Sphere
-from src.vector import Vector
+from src.scene_objects import Sphere, SceneObject
 
 
 if __name__ == "__main__":
@@ -10,26 +11,32 @@ if __name__ == "__main__":
 
     # camera distance 5 along the x-axis, pointed towards the origin
     camera = Camera(
-        eye_position=Vector(5, 0, 0),
+        eye_position=np.array((5, 0, 0)),
         window_size_x=1,
         window_size_y=1,
-        viewing_direction=Vector(-1, 0, 0),
-        orientation_vector=Vector(0, 0, 1),
+        viewing_direction=np.array((-1, 0, 0)),
+        orientation_vector=np.array((0, 0, 1)),
         window_distance=1,
     )
 
-    scene_objects = [
-        Sphere(center=Vector(0.9, -1.6, 1.9), radius=0.3, color=Vector(255, 0, 0)),
-        Sphere(center=Vector(-2, 0, 0.5), radius=3, color=Vector(0, 255, 0)),
-        Sphere(
-            center=Vector(0, 0, 0), radius=0.5, color=Vector(0, 255, 100)
-        ),  # inside red ball
-        Sphere(center=Vector(0, 0, -10000), radius=9990, color=Vector(0, 0, 255)),
+    scene_objects: list[SceneObject] = [
+        # Sphere(
+        #     center=np.array((0.9, -1.6, 1.9)),
+        #     radius=0.3,
+        #     color=np.array((255, 0, 0)),
+        # ),
+        Sphere(center=np.array((-2, 0, 0.5)), radius=3, color=np.array((0, 255, 0))),
+        # Sphere(
+        #     center=np.array((0, 0, 0)), radius=0.5, color=np.array((0, 255, 100))
+        # ),  # inside red ball
+        # Sphere(
+        #     center=np.array((0, 0, -10000)), radius=9990, color=np.array((0, 0, 255))
+        # ),
     ]
 
     light_sources = [
-        LightSource(position=Vector(5, -2, 4)),
-        LightSource(position=Vector(5, 1, 4)),
+        LightSource(position=np.array((5, -2, 4))),
+        LightSource(position=np.array((5, 1, 4))),
     ]
 
     scene = Scene(

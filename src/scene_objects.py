@@ -46,32 +46,44 @@ class Sphere(SceneObject):
         Use abc formula. Rewrite as vector operations. Then rewrite as matrices.
         """
 
+        assert P.shape == V.shape
+        assert len(P.shape) == 2
+        assert P.shape[0] == 3
+
+        n = P.shape[1]
+
         # create arrays for sphere parameters
         S = self.center[:, np.newaxis]  # 3 by 1
-        R = np.array([self.radius])[:, np.newaxis]  # 1 by 1
+        r = np.array(self.radius)  # 1
 
-        A = (V**2).sum(axis=0)  # 1 by n
-        B = ((P - S) * V).sum(axis=0)  # 1 by n
-        C = (P - S) ** 2 - R**2  # 1 by n
+        assert S.shape == (3, 1)
 
-        Dbig = B**2 - 4 * A * C  # 1 by n
+        A = (V**2).sum(axis=0)  # n
+        B = (2 * (P - S) * V).sum(axis=0)  # n
+        C = ((P - S) ** 2).sum(axis=0) - r**2  # n
+        assert A.shape == B.shape == C.shape == (n,)
 
-        sqrtDbig = np.sqrt(Dbig)  # 1 by n
+        Dbig = B**2 - 4 * A * C  # n
 
-        T1 = (-B + sqrtDbig) / (2 * A)  # 1 by n
-        T2 = (-B - sqrtDbig) / (2 * A)  # 1 by n
+        with np.errstate(invalid="ignore"):
+            sqrtDbig = np.sqrt(Dbig)  # n
+
+        T1 = (-B + sqrtDbig) / (2 * A)  # n
+        T2 = (-B - sqrtDbig) / (2 * A)  # n
         T = np.stack([T1, T2], axis=0)  # 2 by n
+        assert T.shape == (2, n)
         T_processed = np.where(np.abs(T) > 1e10, np.inf, T)  # 2 by n
         # entries will be nan if D < 0 and inf/really large if A = 0
+        assert T_processed.shape == (2, n)
 
         # checks for each entry
         valid_mask = ~(np.isnan(T_processed) | np.isinf(T_processed))  # 2 by n
         valid_mask &= (T_processed >= t_min) & (T_processed <= t_max)  # 2 by n
         T_masked = np.where(valid_mask, T_processed, np.inf)  # 2 by n
+        assert T_masked.shape == (2, n)
 
-        # get smallest nad drop it if it is inf
-        result = np.min(T_masked, axis=1)  # n
-        result = np.where(np.isinf(result), np.nan, result)  # n
+        result = np.min(T_masked, axis=0)  # n
+        assert result.shape == (n,)
 
         # result has a t-value or nan
         return result

@@ -49,50 +49,71 @@ class Scene:
                     + ((j + 0.5) * 2 * pixel_size_y * self.camera.right_unit)
                 )
 
-        P = pixel_centers.reshape(3, -1)  # 3 by x*y
-        V = P - self.camera.eye_position[:, np.newaxis]  # 3 by x*y
+        V = (
+            pixel_centers.reshape(3, -1) - self.camera.eye_position[:, np.newaxis]
+        )  # 3 by x*y
+        assert V.shape == (3, resolution_x * resolution_y)
+
+        P = np.tile(
+            self.camera.eye_position[:, np.newaxis], (1, resolution_x * resolution_y)
+        )  # 3 by x*y
+        # TODO probably it doesn't need to be tiled
+        assert P.shape == (3, resolution_x * resolution_y)
 
         distances = np.zeros(
             shape=(len(self.scene_objects), resolution_x, resolution_y)
-        )  # n by x by y
+        )  # b by x by y
+
         for obj_index, scene_object in enumerate(self.scene_objects):
-            temp = scene_object.intersect_rays(
-                self.camera.eye_position, V, 1, np.inf
-            )  # n
-            distances[obj_index, :, :] = np.array(temp).reshape(
+            intersections_unfolded = scene_object.intersect_rays(
+                P, V, 1, np.inf
+            )  # x * y
+            intersections = intersections_unfolded.reshape(
                 resolution_x, resolution_y
-            )
+            )  # x by y
+            distances[obj_index, :, :] = intersections
 
-        # UP TO HERE HAS BEEN REWRITTEN TO NUMPY
+        collision_object_indices = np.argmin(distances, axis=0)  # x by y
+        # taking the argmin will always find something so need to check if its
+        # an actual collision
+        collision_object_indices = np.where(
+            intersections < np.inf, collision_object_indices, -1
+        )
+        assert collision_object_indices.shape == (resolution_x, resolution_y)
 
-        collision_objects = argmin()
-
-        collided_object = self.scene_objects[min_index]
-        collision_point = self.camera.eye_position + min_distance * ray_direction
-        unit_normal = collided_object.get_unit_normal_at_point(collision_point)
-
-        total_illumination = 0.0
-        for light_source in self.light_sources:
-            ray_to_light_source = light_source.position - collision_point
-
-            # check for shadow
-            in_shadow = False
-            for scene_object in self.scene_objects:
-                if scene_object == collided_object:
-                    continue
-                shadow_distance = scene_object.intersect_ray(
-                    collision_point, ray_to_light_source, 0, 1
+        # TODO rewrite without loops
+        pixels = np.zeros((resolution_x, resolution_y, 3))
+        for i in range(resolution_x):
+            for j in range(resolution_y):
+                obj_idx = collision_object_indices[i, j]
+                pixels[i, j, :] = (
+                    self.scene_objects[obj_idx].color
+                    if obj_idx >= 0
+                    else np.array(background_color)
                 )
-                if shadow_distance is not None:
-                    in_shadow = True
-                    break
 
-            total_illumination += (
-                max(0, dot(unit_normal, ray_to_light_source.unit()))
-                if not in_shadow
-                else 0
-            )
-        illumination = total_illumination / len(self.light_sources)
+        # total_illumination = 0.0
+        # for light_source in self.light_sources:
+        #     ray_to_light_source = light_source.position - collision_point
+
+        #     # check for shadow
+        #     # in_shadow = False
+        #     # for scene_object in self.scene_objects:
+        #     #     if scene_object == collided_object:
+        #     #         continue
+        #     #     shadow_distance = scene_object.intersect_ray(
+        #     #         collision_point, ray_to_light_source, 0, 1
+        #     #     )
+        #     #     if shadow_distance is not None:
+        #     #         in_shadow = True
+        #     #         break
+
+        #     total_illumination += (
+        #         max(0, dot(unit_normal, ray_to_light_source.unit()))
+        #         if not in_shadow
+        #         else 0
+        #     )
+        # illumination = total_illumination / len(self.light_sources)
         # not sure this is a good way to do illumination but it doesn't matter for one source
 
         return SimpleImage(pixels)
