@@ -1,50 +1,66 @@
+"""Module containing vector class and relevant operations."""
+
 import math
 import random
 from typing import Self
 
 
 class Vector:
+    """3D vector represented by 3 coordinates."""
+
     def __init__(self, x: float, y: float, z: float):
+        """Create a vector."""
         self.x = x
         self.y = y
         self.z = z
 
     def __mul__(self, t: float) -> Self:
+        """Multiply vector by float."""
         return self.__class__(t * self.x, t * self.y, t * self.z)
 
     def __rmul__(self, t: float) -> Self:
+        """Multiply float by vector."""
         return self * t
 
     def __add__(self, v: Self) -> Self:
+        """Add vector to vector."""
         return self.__class__(self.x + v.x, self.y + v.y, self.z + v.z)
 
     def __neg__(self) -> Self:
+        """Get negative vector."""
         return self.__class__(-self.x, -self.y, -self.z)
 
     def __sub__(self, v: Self) -> Self:
+        """Subtract other vector."""
         return self + (-v)
 
     def squared_magnitude(self) -> float:
+        """Get squared magniture."""
         return (self.x**2) + (self.y**2) + (self.z**2)
 
     def magnitude(self) -> float:
+        """Get magnitude."""
         return math.sqrt(self.squared_magnitude())
 
     def unit(self) -> Self:
+        """Get a unit vector of the vector."""
         magnitude = self.magnitude()
         return self.__class__(
             self.x / magnitude, self.y / magnitude, self.z / magnitude
         )
 
     def __str__(self):
+        """Get string representation (x, y, z)."""
         return f"{self.x}, {self.y}, {self.z}"
 
 
 def dot(v1: Vector, v2: Vector) -> float:
+    """Dot product of two vectors."""
     return (v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z)
 
 
 def cross(v1: Vector, v2: Vector) -> Vector:
+    """Cross product of two vectors."""
     return Vector(
         (v1.y * v2.z) - (v1.z * v2.y),
         (v1.z * v2.x) - (v1.x * v2.z),
@@ -53,10 +69,12 @@ def cross(v1: Vector, v2: Vector) -> Vector:
 
 
 def elementwise_mult(u: Vector, v: Vector) -> Vector:
+    """Element-wise multiplication of two vectors."""
     return Vector(u.x * v.x, u.y * v.y, u.z * v.z)
 
 
 def proj(source_vector: Vector, project_onto_vector: Vector) -> Vector:
+    """Get projection of a vector on another vector."""
     return (
         dot(source_vector, project_onto_vector)
         / project_onto_vector.squared_magnitude()
@@ -65,6 +83,7 @@ def proj(source_vector: Vector, project_onto_vector: Vector) -> Vector:
 
 
 def reflect_around(source_vector: Vector, reflect_around_vector: Vector) -> Vector:
+    """Reflect a vector around another vector."""
     return 2 * proj(source_vector, reflect_around_vector) - source_vector
 
 
@@ -92,7 +111,7 @@ def linear_interpolation(v1: Vector, v2: Vector, k: float) -> Vector:
 
 
 if __name__ == "__main__":
-    """Basic tests"""
+    """Basic tests."""
     u = Vector(1, 2, 3)
     v = Vector(1, 1, 1)
     print(-u)

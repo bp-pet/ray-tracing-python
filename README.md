@@ -15,17 +15,15 @@ There is a separate branch with a simple implementation in `numpy`, where all op
 My first idea did not include recursion for the bounces so I went with that. I see that the ebook uses it and I agree it is cleaner but I don't think it is really necessary here so I leave it as it is.
 
 ### Ray bouncing
-Went for linearly interpolating between a clean bounce and a random bounce based on object roughness. This should work for our purposes although the quality is likely worse than the proper logic (Lambertian random bounce for matte objects and fuzzy clean bounce for shiny objects).
+Went for linearly interpolating between a clean bounce and a random bounce based on object roughness. For the random bounce I have both pure random and Lambertian  (the latter works better of course). The linear interpolation should work for our purposes although the quality is likely worse than the proper logic (Lambertian random bounce for matte objects and fuzzy clean bounce for shiny objects).
 
 ### Color propagation
-There is the problem of mixing the object's own color with the incoming color. My initial idea was to do this also with linear interpolation, but this gets quite messy. Doing 50-50 interpolation means giving disproportionate attention to the last observed color (which will almost always be the background color). So it has to be some weighed average but figuring out the weights seems like an annoying task. The ebook suggests multiplying the colors without any extra steps. I wouldn't intuitively guess that this would work but it does so let's go with it.
+There is the problem of mixing the object's own color with the incoming color. Implemented the multiplication method, as well as a really basic weighed average method that seems to work not as well.
 
 ### Antialiasing/filters
-My initial plan was to avoid antialiasing this entirely and just produce low quality images, as quality was not really my goal. However, it seems filters have a much more important role when dealing with randomness in bounces. So we will see if it will become necessary eventually.
+My initial plan was to avoid antialiasing entirely since I assumed it is only important for clean edges. But then I noticed that the results become really bad when working with random bounces and no sampling. In any case it can be turned off, which leads to decent results when only using reflective objects (no randomness).
 
 ### Not in this project
 Some things mentioned in the ebook surely make the quality much better but I don't have much interest in them so I skip them unless they prove necessary. This would be:
 - Field of view/blur/other camera properties.
-- Previously mentioned ray bouncing improvements.
-- Most numerical stability fixes.
 - Glass-type materials.

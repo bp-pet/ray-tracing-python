@@ -1,3 +1,5 @@
+"""Module containing the scene with rendering methods."""
+
 import math
 
 from src.camera import Camera
@@ -26,12 +28,15 @@ from src.vector import (
 
 
 class Scene:
+    """Scene containing objects and a camera."""
+
     def __init__(
         self,
         camera: Camera,
         scene_objects: list[SceneObject],
         light_sources: list[LightSource],
     ):
+        """Create the scene."""
         self.camera = camera
         self.scene_objects = scene_objects
         self.light_sources = light_sources
@@ -59,6 +64,7 @@ class Scene:
         return min_distance, min_index
 
     def get_illumination(self, point_of_interest: Vector, unit_normal: Vector) -> float:
+        """Calculate the illumination on a point. Currently not used."""
         total_illumination = 0.0
         for light_source in self.light_sources:
             ray_to_light_source = light_source.position - point_of_interest
@@ -84,9 +90,11 @@ class Scene:
     def calculate_color(
         self, observed_colors: list[Vector], method: str = DEFAULT_COLOR_MIXING_METHOD
     ) -> Vector:
-        # TODO should just store colors in [0, 1] range until rendering
+        """Calculate the color of colors that are the result of a sequence of ray bounces.
 
+        Different methods are implemented for this."""
         if method == "multiply":
+            # TODO should just store colors in [0, 1] range until rendering
             result = observed_colors[0]
             for c in range(1, len(observed_colors)):
                 result = (
@@ -105,9 +113,10 @@ class Scene:
         return result
 
     def get_ray_color(self, starting_point: Vector, ray_direction: Vector) -> Vector:
+        """Given a ray (p and v), get the color that it observes."""
         observed_colors: list[Vector] = []
 
-        for _ in range(MAX_NUMBER_OF_BOUNCES):  # TODO put in settings
+        for _ in range(MAX_NUMBER_OF_BOUNCES):
             # find next collision
             t, object_index = self.send_ray(
                 starting_point, ray_direction, TOLERANCE, math.inf
@@ -126,11 +135,11 @@ class Scene:
             unit_normal = collided_object.get_unit_normal_at_point(collision_point)
             if NUMERICAL_FIX_COLLISION_POINT:
                 # make sure starting point of next ray is outside object
-                starting_point = collision_point + TOLERANCE * unit_normal
+                starting_point = collision_point + 0.001 * unit_normal
             else:
                 starting_point = collision_point
 
-            # calculate next direction
+            # calculate next direction depending on object roughness
             clean_bounce = reflect_around(-ray_direction, unit_normal)
             random_bounce = random_vector_in_hemisphere(unit_normal)
             ray_direction = linear_interpolation(

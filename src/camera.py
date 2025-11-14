@@ -1,7 +1,12 @@
+"""Module containing camera class."""
+
 from src.vector import Vector, dot, cross
+
 
 class Camera:
     """
+    Class representing a camera in 3D space.
+
     Characterized by an 'eye' and a 'window', where the eye 'views' a scene
     through the window.
 
@@ -24,7 +29,7 @@ class Camera:
         viewing_direction: Vector,
         orientation_vector: Vector,
         window_distance: float,
-    ):
+    ) -> None:
         self.eye_position = eye_position
         self.window_size_x = window_size_x
         self.window_size_y = window_size_y
@@ -34,7 +39,7 @@ class Camera:
         self.window_distance = window_distance
 
         assert dot(self.viewing_direction, self.orientation_vector) == 0, (
-            "Orientation be orthogonal to the viewing direction"
+            "Orientation must be orthogonal to the viewing direction"
         )
 
         self.window_center = self.eye_position + (
@@ -44,7 +49,10 @@ class Camera:
         # it's not really unit but the one from the center to the top/right border
         # maybe should be renamed
         self.up_unit = self.orientation_vector.unit() * self.window_size_x
-        self.right_unit = -cross(self.orientation_vector, self.viewing_direction).unit() * self.window_size_y
+        self.right_unit = (
+            -cross(self.orientation_vector, self.viewing_direction).unit()
+            * self.window_size_y
+        )
 
         self.top_right = (
             self.window_center
@@ -67,6 +75,7 @@ class Camera:
             - (self.right_unit * self.window_size_y)
         )
 
+
 if __name__ == "__main__":
     """Testing basic properties."""
     camera = Camera(
@@ -77,7 +86,7 @@ if __name__ == "__main__":
         orientation_vector=Vector(0, 0, 1),
         window_distance=1,
     )
-    
+
     print(camera.window_center)
     print(camera.up_unit)
     print(camera.right_unit)

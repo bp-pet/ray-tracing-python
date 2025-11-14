@@ -1,9 +1,13 @@
+"""All types of objects that can be added to a scene."""
+
 import math
 
 from src.vector import Vector, dot
 
 
 class SceneObject:
+    """Abstract class for scene objects."""
+
     def __init__(self, color: Vector, roughness: float):
         self.color = color
         self.roughness = roughness
@@ -11,14 +15,20 @@ class SceneObject:
     def intersect_ray(
         self, p: Vector, v: Vector, t_min: float, t_max: float
     ) -> float | None:
+        """Find the smallest value of t in a given interval, where a ray p + t * v
+        intersects the object."""
         pass
 
     def get_unit_normal_at_point(self, p: Vector) -> Vector:
+        """Get the unit normal of a point with respect to the object."""
         return Vector(0, 0, 0)
 
 
 class Sphere(SceneObject):
+    """Sphere represented by a center position and a radius."""
+
     def __init__(self, center: Vector, radius: float, color: Vector, roughness: float):
+        """Create a sphere."""
         self.center = center
         self.radius = radius
         self.color = color
@@ -56,12 +66,12 @@ class Sphere(SceneObject):
         b = 2 * dot(p - self.center, v)
         c = (p - self.center).squared_magnitude() - self.radius**2
 
-        if a == 0:
-            return -c / b
+        assert a != 0, "Ray with 0 direction given"
 
         D = b**2 - 4 * a * c
 
         if D < 0:
+            # no intersection.
             return None
 
         sqrtD = math.sqrt(D)
@@ -69,9 +79,11 @@ class Sphere(SceneObject):
         t1 = (-b + sqrtD) / (2 * a)
         t2 = (-b - sqrtD) / (2 * a)
 
+        # check if results are in interval
         t1_checked = t1 if t_min <= t1 <= t_max else None
         t2_checked = t2 if t_min <= t2 <= t_max else None
 
+        # return smaller result
         if t1_checked is None and t2_checked is None:
             return None
         if t1_checked is None:
@@ -83,6 +95,6 @@ class Sphere(SceneObject):
     def get_unit_normal_at_point(self, p: Vector) -> Vector:
         """
         Calculate the normal at a point. If the point is not on
-        the sphere, it will be projected on it.
+        the sphere, it will be effectively projected on it.
         """
         return (p - self.center).unit()
