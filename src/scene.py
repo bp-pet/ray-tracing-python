@@ -1,7 +1,11 @@
 import math
 
 from src.camera import Camera
-from src.constants import background_color, color_reflection_rate, max_number_of_bounces
+from src.constants import (
+    background_color,
+    max_number_of_bounces,
+    tolerance,
+)
 from src.scene_objects import SceneObject
 from src.light_source import LightSource
 from src.simple_image import SimpleImage
@@ -11,6 +15,7 @@ from src.vector import (
     dot,
     random_vector_in_hemisphere,
     linear_interpolation,
+    elementwise_mult,
 )
 
 
@@ -70,6 +75,29 @@ class Scene:
         illumination = total_illumination / len(self.light_sources)
         return illumination
 
+    def calculate_color(
+        self, observed_colors: list[Vector], method: str = "multiply"
+    ) -> Vector:
+        # TODO should just store colors in [0, 1] range until rendering
+
+        if method == "multiply":
+            result = observed_colors[0]
+            for c in range(1, len(observed_colors)):
+                result = (
+                    elementwise_mult(result * (1 / 256), observed_colors[c] * (1 / 256))
+                    * 256
+                )
+        elif method == "average":
+            # example for 4 observed colors: 1/2 * colors[0] + 1/4 * colors[1] + 1/8 * colors[2] + 1/8 * colors[3]
+            result = Vector(0, 0, 0)
+            for c in range(len(observed_colors)):
+                result += observed_colors[c] * (0.5 ** (c + 1))
+            result += observed_colors[-1] * (0.5 ** (len(observed_colors)))
+        else:
+            raise Exception("Invalid method for calculating color")
+
+        return result
+
     def capture(
         self, resolution_x: int, resolution_y: int, verbose: bool = False
     ) -> SimpleImage:
@@ -105,8 +133,8 @@ class Scene:
                 for _ in range(max_number_of_bounces):  # TODO put in settings
                     # find next collision
                     t, object_index = self.send_ray(
-                        self.camera.eye_position, ray_direction, 1, math.inf
-                    )
+                        starting_point, ray_direction, tolerance, math.inf
+                    )  # TODO for the first ray t_min should be 1, otherwise collision may be inside camera
 
                     # add color to list
                     if object_index is None:
@@ -131,12 +159,7 @@ class Scene:
                     )
 
                 # calculate color
-                # example for 4 observed colors: 1/2 * colors[0] + 1/4 * colors[1] + 1/8 * colors[2] + 1/8 * colors[3]
-                pixel_color = Vector(0, 0, 0)
-                for c in range(len(observed_colors)):
-                    pixel_color += observed_colors[c] * (0.5 ** (c + 1))
-                pixel_color += observed_colors[-1] * (0.5 ** (len(observed_colors)))
-
+                pixel_color = self.calculate_color(observed_colors)
                 row.append(pixel_color)
 
             pixels.append(row)

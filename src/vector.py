@@ -52,6 +52,10 @@ def cross(v1: Vector, v2: Vector) -> Vector:
     )
 
 
+def elementwise_mult(u: Vector, v: Vector) -> Vector:
+    return Vector(u.x * v.x, u.y * v.y, u.z * v.z)
+
+
 def proj(source_vector: Vector, project_onto_vector: Vector) -> Vector:
     return (
         dot(source_vector, project_onto_vector)
