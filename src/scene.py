@@ -2,9 +2,11 @@ import math
 
 from src.camera import Camera
 from src.constants import (
-    background_color,
-    max_number_of_bounces,
-    tolerance,
+    BACKGROUND_COLOR,
+    MAX_NUMBER_OF_BOUNCES,
+    TOLERANCE,
+    DEFAULT_COLOR_MIXING_METHOD,
+    NUMERICAL_FIX_COLLISION_POINT,
 )
 from src.scene_objects import SceneObject
 from src.light_source import LightSource
@@ -76,7 +78,7 @@ class Scene:
         return illumination
 
     def calculate_color(
-        self, observed_colors: list[Vector], method: str = "multiply"
+        self, observed_colors: list[Vector], method: str = DEFAULT_COLOR_MIXING_METHOD
     ) -> Vector:
         # TODO should just store colors in [0, 1] range until rendering
 
@@ -117,7 +119,7 @@ class Scene:
             row = []
             for j in range(resolution_y):
                 if not self.scene_objects:
-                    row.append(Vector(*background_color))
+                    row.append(Vector(*BACKGROUND_COLOR))
                     continue
 
                 pixel_center = (
@@ -130,16 +132,16 @@ class Scene:
 
                 observed_colors: list[Vector] = []
 
-                for _ in range(max_number_of_bounces):  # TODO put in settings
+                for _ in range(MAX_NUMBER_OF_BOUNCES):  # TODO put in settings
                     # find next collision
                     t, object_index = self.send_ray(
-                        starting_point, ray_direction, tolerance, math.inf
+                        starting_point, ray_direction, TOLERANCE, math.inf
                     )  # TODO for the first ray t_min should be 1, otherwise collision may be inside camera
 
                     # add color to list
                     if object_index is None:
                         # no collision, end tracing
-                        observed_colors.append(Vector(*background_color))
+                        observed_colors.append(Vector(*BACKGROUND_COLOR))
                         break
                     collided_object = self.scene_objects[object_index]
                     observed_colors.append(collided_object.color)
@@ -149,7 +151,9 @@ class Scene:
                     unit_normal = collided_object.get_unit_normal_at_point(
                         collision_point
                     )
-                    starting_point = collision_point
+                    if NUMERICAL_FIX_COLLISION_POINT:
+                        # make sure starting point of next ray is outside object
+                        starting_point = collision_point + TOLERANCE * unit_normal
 
                     # calculate next direction
                     clean_bounce = reflect_around(-ray_direction, unit_normal)

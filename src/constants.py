@@ -1,5 +1,11 @@
-background_color = (80, 240, 240)
+BACKGROUND_COLOR = (80, 240, 240)
 
-max_number_of_bounces = 10
+MAX_NUMBER_OF_BOUNCES = 10
 
-tolerance = 1e-10
+TOLERANCE = 1e-10
+
+
+# settings
+BETTER_RANDOM_BOUNCE = True
+NUMERICAL_FIX_COLLISION_POINT = False
+DEFAULT_COLOR_MIXING_METHOD = "multiply"

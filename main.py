@@ -19,18 +19,18 @@ if __name__ == "__main__":
     )
 
     scene_objects: list[SceneObject] = [
-        # Sphere(
-        #     center=Vector(0, 2, 0),
-        #     radius=1,
-        #     color=Vector(255, 100, 100),
-        #     roughness=1,
-        # ),
+        Sphere(
+            center=Vector(0, 2, 0),
+            radius=1,
+            color=Vector(255, 100, 100),
+            roughness=1,
+        ),
         Sphere(
             center=Vector(0, 0, 0), radius=1, color=Vector(201, 201, 101), roughness=1
         ),
-        # Sphere(
-        #     center=Vector(0, -2, 0), radius=1, color=Vector(100, 255, 100), roughness=1
-        # ),
+        Sphere(
+            center=Vector(0, -2, 0), radius=1, color=Vector(100, 255, 100), roughness=1
+        ),
         Sphere(
             center=Vector(0, 0, -1000),
             radius=999,
