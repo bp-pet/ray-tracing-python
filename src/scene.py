@@ -154,6 +154,8 @@ class Scene:
                     if NUMERICAL_FIX_COLLISION_POINT:
                         # make sure starting point of next ray is outside object
                         starting_point = collision_point + TOLERANCE * unit_normal
+                    else:
+                        starting_point = collision_point
 
                     # calculate next direction
                     clean_bounce = reflect_around(-ray_direction, unit_normal)
