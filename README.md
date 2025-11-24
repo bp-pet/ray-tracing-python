@@ -1,5 +1,5 @@
-# Scene rendering in Python
-Simple implementation of scene rendering. Can set a camera position and some objects in `main.py`, then running it will render the scene.
+# Ray tracing in Python
+Simple implementation of scene rendering with ray tracing. Can set a camera position and some objects in `main.py`, then running it will render the scene.
 
 Based on https://raytracing.github.io/books/RayTracingInOneWeekend.html. The goal of the project is learning so I went over some of my process below.
 
